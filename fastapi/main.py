@@ -38,6 +38,7 @@ from fastapi.templating import Jinja2Templates
 
 
 import time
+import whisper
 # from mongoengine import DateTimeField,metaField
 
 # set model params
@@ -243,12 +244,12 @@ async def detect_in_video(file: UploadFile = File(...),max_frame_number:int=10):
     print("detected response:",jsonobj)
     return jsonobj
 
-@app.post("/whisper/")
-async def whisper_in_voice(file: UploadFile = File(...),language:str='',model:str='small'):
+@app.post("/detect/voice")
+async def detect_in_voice(file: UploadFile = File(...),language:str='',model:str='small'):
     extension = file.filename.split(".")[-1] in ("wav", "mp3", "flac")
     if not extension:
-        return "Image must be jpg or png format!"
-    img_uploaded = read_imagefile(await file.read())
+        return "voice must be acceptable format!"
+    voice_uploaded = read_imagefile(await file.read())
     # img_data = None
     # if type(file) is str :
     #     imgdata = base64.b64decode(imgstr)
@@ -261,9 +262,12 @@ async def whisper_in_voice(file: UploadFile = File(...),language:str='',model:st
     # assert img_uploaded is None
     # print("file.filename:",file.filename)
     # print("img_uploaded:",img_uploaded)
-    img_uploaded_path = "uploaded_"+ str(file.filename)
-    print("img_uploaded_path:",img_uploaded_path)
+    voice_uploaded_path = "uploaded_"+ str(file.filename)
+    print("voice_uploaded_path:",img_uploaded_path)
     img_uploaded.save(img_uploaded_path)
+model = whisper.load_model(model)
+result = model.transcribe()
+print(result["text"])
     #start = datetime.now()
     #opt = detector.parse_opt()
     #opt = Namespace(weights='yolov5n6.pt', source=img_uploaded_path)
